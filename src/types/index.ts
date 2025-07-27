@@ -12,7 +12,6 @@ export interface Transaction {
 export interface Settings {
     id?: number;
     initial_balance: number;
-    currency: string;
     created_at?: string;
     updated_at?: string;
 }

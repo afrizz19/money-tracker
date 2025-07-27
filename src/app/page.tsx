@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { FiDollarSign, FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiDollarSign, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { Transaction, Settings, MoneyTracker } from '@/types';
 
 import DarkVeil from './background';
-// Helper function to get current Jakarta time in datetime-local format
+// Helper function to get current Jakarta time in datetime-local format with seconds
 const getJakartaTime = () => {
   const now = new Date();
   const jakartaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
@@ -14,7 +14,8 @@ const getJakartaTime = () => {
   const day = String(jakartaTime.getDate()).padStart(2, '0');
   const hours = String(jakartaTime.getHours()).padStart(2, '0');
   const minutes = String(jakartaTime.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
+  const seconds = String(jakartaTime.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 };
 
 // Helper function to format date for display in Jakarta timezone
@@ -33,7 +34,7 @@ const formatJakartaDate = (dateString: string) => {
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [settings, setSettings] = useState<Settings>({ initial_balance: 0, currency: 'IDR' });
+  const [settings, setSettings] = useState<Settings>({ initial_balance: 0 });
   const [moneyTracker, setMoneyTracker] = useState<MoneyTracker>({
     total_income: 0,
     total_expenses: 0,
@@ -42,9 +43,8 @@ export default function Home() {
   });
 
   const [showForm, setShowForm] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showInitialBalanceModal, setShowInitialBalanceModal] = useState(false);
-  const [isInitialBalanceSet, setIsInitialBalanceSet] = useState(false);
+  
+  
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<number | null>(null);
 
@@ -55,6 +55,24 @@ export default function Home() {
     usage: '',
     date_time: getJakartaTime()
   });
+  const [isDateTimeEdited, setIsDateTimeEdited] = useState(false);
+
+  // Add this effect for real-time clock when form is open and not edited
+  useEffect(() => {
+    if (!showForm || isDateTimeEdited) return;
+    const interval = setInterval(() => {
+      setFormData((prev) => ({
+        ...prev,
+        date_time: getJakartaTime()
+      }));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [showForm, isDateTimeEdited]);
+
+  // Reset isDateTimeEdited when form is closed
+  useEffect(() => {
+    if (!showForm) setIsDateTimeEdited(false);
+  }, [showForm]);
 
   useEffect(() => {
     fetchTransactions();
@@ -106,22 +124,12 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         setSettings(data);
-
-        // Check if initial balance is set (not 0 or null)
-        if (data.initial_balance && data.initial_balance > 0) {
-          setIsInitialBalanceSet(true);
-        } else {
-          // Show initial balance modal if not set
-          setShowInitialBalanceModal(true);
-        }
       } else {
-        setSettings({ initial_balance: 0, currency: 'IDR' });
-        setShowInitialBalanceModal(true);
+        setSettings({ initial_balance: 0 });
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
-      setSettings({ initial_balance: 0, currency: 'IDR' });
-      setShowInitialBalanceModal(true);
+      setSettings({ initial_balance: 0 });
     }
   };
 
@@ -152,44 +160,9 @@ export default function Home() {
     }
   };
 
-  const handleInitialBalanceSetup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  
 
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-
-      if (response.ok) {
-        setShowInitialBalanceModal(false);
-        setIsInitialBalanceSet(true);
-        fetchSettings();
-      }
-    } catch (error) {
-      console.error('Error setting initial balance:', error);
-    }
-  };
-
-  const handleSettingsUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-
-      if (response.ok) {
-        setShowSettings(false);
-        fetchSettings();
-      }
-    } catch (error) {
-      console.error('Error updating settings:', error);
-    }
-  };
+  
 
   const handleConfirmDelete = async () => {
     if (transactionToDelete) {
@@ -223,18 +196,11 @@ export default function Home() {
 
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold flex items-center gap-2">
+          <h1 className="text-4xl font-semibold flex items-center gap-2">
             <FiDollarSign className="text-green-500" />
             Money Tracker
           </h1>
-          <button
-            onClick={() => setShowSettings(true)}
-            className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-            disabled={!isInitialBalanceSet}
-          >
-            <FiEdit />
-            Settings
-          </button>
+          
         </div>
 
         {/* Money Summary Cards */}
@@ -259,18 +225,11 @@ export default function Home() {
         <div className="mb-6">
           <button
             onClick={() => setShowForm(true)}
-            className={`px-6 py-3 rounded-lg flex items-center gap-2 transition-colors ${isInitialBalanceSet
-              ? 'bg-green-600 hover:bg-green-700'
-              : 'bg-gray-600 cursor-not-allowed'
-              }`}
-            disabled={!isInitialBalanceSet}
+            className="px-6 py-3 rounded-lg flex items-center gap-2 transition-colors bg-green-600 hover:bg-green-700"
           >
             <FiPlus />
             Add Transaction
           </button>
-          {!isInitialBalanceSet && (
-            <p className="text-gray-400 text-sm mt-2">Please set your initial balance first</p>
-          )}
         </div>
 
         {/* Transaction Form Modal */}
@@ -335,11 +294,6 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
-                  {formData.amount && (
-                    <p className="text-sm text-gray-400 mt-1">
-                      {Number(formData.amount).toLocaleString('id-ID')} Rupiah
-                    </p>
-                  )}
                 </div>
 
                 <div>
@@ -368,8 +322,12 @@ export default function Home() {
                   <label className="block text-sm font-medium mb-2">Date & Time</label>
                   <input
                     type="datetime-local"
+                    step="1" // <-- add this to allow seconds selection
                     value={formData.date_time}
-                    onChange={(e) => setFormData({ ...formData, date_time: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, date_time: e.target.value });
+                      setIsDateTimeEdited(true);
+                    }}
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
                     required
                   />
@@ -395,111 +353,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* Settings Modal */}
-        {showSettings && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">Settings</h2>
-              <form onSubmit={handleSettingsUpdate} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Currency</label>
-                  <select
-                    value={settings.currency}
-                    onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
-                  >
-                    <option value="IDR">IDR (Rp)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
-                  </select>
-                </div>
+        
 
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowSettings(false)}
-                    className="flex-1 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Initial Balance Setup Modal */}
-        {showInitialBalanceModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">Set Initial Balance</h2>
-              <p className="text-gray-400 mb-4">Please set your initial balance. This can only be set once and cannot be changed later.</p>
-              <form onSubmit={handleInitialBalanceSetup} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Initial Balance (IDR)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">Rp</span>
-                    <input
-                      type="number"
-                      step="1000"
-                      min="0"
-                      value={settings.initial_balance}
-                      onChange={(e) => setSettings({ ...settings, initial_balance: Number(e.target.value) })}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-12 py-2 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      required
-                      placeholder="0"
-                    />
-                    <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const currentValue = Number(settings.initial_balance) || 0;
-                          setSettings({ ...settings, initial_balance: currentValue + 1000 });
-                        }}
-                        className="w-6 h-3 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-xs flex items-center justify-center border-b border-gray-600"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const currentValue = Number(settings.initial_balance) || 0;
-                          if (currentValue >= 1000) {
-                            setSettings({ ...settings, initial_balance: currentValue - 1000 });
-                          }
-                        }}
-                        className="w-6 h-3 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-xs flex items-center justify-center"
-                      >
-                        ▼
-                      </button>
-                    </div>
-                  </div>
-                  {settings.initial_balance > 0 && (
-                    <p className="text-sm text-gray-400 mt-1">
-                      {Number(settings.initial_balance).toLocaleString('id-ID')} Rupiah
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Set Balance
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
@@ -558,7 +414,7 @@ export default function Home() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{transaction.description}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{transaction.usage}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-thin italic text-gray-400">
                       {formatJakartaDate(transaction.date_time)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">

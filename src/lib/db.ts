@@ -20,10 +20,10 @@ export async function getConnection() {
     return pool;
 }
 
-export async function query(sql: string, params?: any[]) {
+export async function query<T = unknown>(sql: string, params?: unknown[]): Promise<T[]> {
     const connection = await getConnection();
     const [rows] = await connection.execute(sql, params);
-    return rows;
+    return rows as T[];
 }
 
 export async function closeConnection() {

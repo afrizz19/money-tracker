@@ -22,12 +22,12 @@ export async function POST(request: NextRequest) {
         const body: Transaction = await request.json();
         const { type, amount, description, usage, date_time } = body;
 
-        const result = await query(
+        const result = await query<{ insertId: number }>(
             'INSERT INTO transactions (type, amount, description, `usage`, date_time) VALUES (?, ?, ?, ?, ?)',
             [type, amount, description, usage, date_time]
-        ) as any;
+        );
 
-        return NextResponse.json({ success: true, id: result.insertId });
+        return NextResponse.json({ success: true, id: result[0]?.insertId });
     } catch (error) {
         console.error('Error creating transaction:', error);
         return NextResponse.json(
@@ -35,4 +35,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-} 
+}

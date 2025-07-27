@@ -18,10 +18,9 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE TABLE IF NOT EXISTS settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     initial_balance DECIMAL(10,2) DEFAULT 0.00,
-    currency VARCHAR(10) DEFAULT 'IDR',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Insert default settings
-INSERT INTO settings (initial_balance, currency) VALUES (0.00, 'IDR') ON DUPLICATE KEY UPDATE id=id; 
+INSERT INTO settings (initial_balance) VALUES (0.00) ON DUPLICATE KEY UPDATE id=id; 
