@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Money Tracker
 
-## Getting Started
+A modern money tracking application built with Next.js, TypeScript, and MySQL. Track your income, expenses, and maintain a clear overview of your financial status.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 🎯 **Income & Expense Tracking**: Add and categorize your financial transactions
+- 💰 **Real-time Balance Calculation**: See your current balance after all transactions
+- 📊 **Financial Overview**: View total income, expenses, and net balance
+- ⚙️ **Customizable Settings**: Set your initial balance and preferred currency
+- 📅 **Date & Time Tracking**: Record when each transaction occurred
+- 🗑️ **Transaction Management**: Delete transactions as needed
+- 🎨 **Modern UI**: Clean black and white theme with responsive design
+
+## Tech Stack
+
+- **Frontend**: Next.js 14 with TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: React Icons (Feather Icons)
+- **Database**: MySQL 8.0
+- **Containerization**: Docker & Docker Compose
+
+## Prerequisites
+
+- Node.js 18+ 
+- Docker and Docker Compose
+- Git
+
+## Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd money-tracker
+   ```
+
+2. **Start the MySQL database**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Set up environment variables**
+   Create a `.env.local` file in the root directory:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=moneytracker
+   DB_PASSWORD=moneytracker123
+   DB_NAME=money_tracker
+   ```
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Database Setup
+
+The application automatically creates the necessary database tables when you first start the MySQL container. The database includes:
+
+- **transactions**: Stores all income and expense records
+- **settings**: Stores user preferences like initial balance and currency
+
+## Usage
+
+1. **Set Initial Balance**: Click the "Settings" button to set your starting balance
+2. **Add Transactions**: Click "Add Transaction" to record income or expenses
+3. **Track Usage**: Use the "Usage" field to categorize your transactions
+4. **Monitor Balance**: View your current balance in the summary cards
+5. **Manage Transactions**: Delete transactions using the trash icon
+
+## API Endpoints
+
+- `GET /api/transactions` - Fetch all transactions
+- `POST /api/transactions` - Create a new transaction
+- `DELETE /api/transactions/[id]` - Delete a transaction
+- `GET /api/settings` - Fetch user settings
+- `PUT /api/settings` - Update user settings
+
+## Project Structure
+
+```
+money-tracker/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── transactions/
+│   │   │   └── settings/
+│   │   └── page.tsx
+│   ├── lib/
+│   │   └── db.ts
+│   └── types/
+│       └── index.ts
+├── database/
+│   └── init.sql
+├── docker-compose.yml
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Database**: The MySQL database runs in a Docker container
+- **Hot Reload**: Next.js provides automatic reloading during development
+- **Type Safety**: Full TypeScript support for better development experience
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Production Deployment
 
-## Learn More
+1. Build the application:
+   ```bash
+   npm run build
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. Start the production server:
+   ```bash
+   npm start
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Ensure your MySQL database is accessible and properly configured
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Contributing
 
-## Deploy on Vercel
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is open source and available under the MIT License.
