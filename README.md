@@ -7,7 +7,6 @@ A modern money tracking application built with Next.js, TypeScript, and MySQL. T
 - 🎯 **Income & Expense Tracking**: Add and categorize your financial transactions
 - 💰 **Real-time Balance Calculation**: See your current balance after all transactions
 - 📊 **Financial Overview**: View total income, expenses, and net balance
-- ⚙️ **Customizable Settings**: Set your initial balance and preferred currency
 - 📅 **Date & Time Tracking**: Record when each transaction occurred
 - 🗑️ **Transaction Management**: Delete transactions as needed
 - 🎨 **Modern UI**: Clean black and white theme with responsive design
@@ -67,15 +66,14 @@ A modern money tracking application built with Next.js, TypeScript, and MySQL. T
 The application automatically creates the necessary database tables when you first start the MySQL container. The database includes:
 
 - **transactions**: Stores all income and expense records
-- **settings**: Stores user preferences like initial balance and currency
+- **settings**: Stores user preferences like initial balance
 
 ## Usage
 
-1. **Set Initial Balance**: Click the "Settings" button to set your starting balance
-2. **Add Transactions**: Click "Add Transaction" to record income or expenses
-3. **Track Usage**: Use the "Usage" field to categorize your transactions
-4. **Monitor Balance**: View your current balance in the summary cards
-5. **Manage Transactions**: Delete transactions using the trash icon
+1. **Add Transactions**: Click "Add Transaction" to record income or expenses
+2. **Track Usage**: Use the "Usage" field to categorize your transactions
+3. **Monitor Balance**: View your current balance in the summary cards
+4. **Manage Transactions**: Delete transactions using the trash icon
 
 ## API Endpoints
 
@@ -83,7 +81,6 @@ The application automatically creates the necessary database tables when you fir
 - `POST /api/transactions` - Create a new transaction
 - `DELETE /api/transactions/[id]` - Delete a transaction
 - `GET /api/settings` - Fetch user settings
-- `PUT /api/settings` - Update user settings
 
 ## Project Structure
 
@@ -134,4 +131,4 @@ money-tracker/
 
 ## License
 
-This project is open source and available under the MIT License.
+This project is open source and available under the [MIT License](LICENSE).
